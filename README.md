@@ -1,11 +1,9 @@
-btsnoop
+BtsnoopSabrinaRemote
 =======
 
-Python-based parsing module for btsnoop packet capture files and encapsulated Bluetooth packets
+Script for extracting the hex data required to set the IR buttons on Chromecast Remote
 
-Originally forked from: https://github.com/joekickass/python-btsnoop.
-
-Some enhancements inspired by: https://github.com/regnirof/hciparse.
+Originally forked from: https://github.com/traviswpeters/btsnoop.
 
 (NOTE: The latter added support for Apple PacketLogger packet capture files and encapsulated Bluetooth packets, which may be of interested later. 
 They made some undesirable changes to names, etc., which is the only reason I didn't fork from regnirof's repository.)
