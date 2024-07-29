@@ -12,7 +12,7 @@ import btsnoop.bt.smp as smp
 # In the input file, the desired record numbers should be indexed from 1, like in WireShark
 
 # Write down the accepted handles
-DESIRED_HANDLES = {"1f", "36"}
+DESIRED_HANDLES = {"53", "36"}
 
 
 
@@ -23,12 +23,14 @@ def read_le_att_value(records, desired_record_no, handles):
     l2cap_length, l2cap_cid, l2cap_data = l2cap.parse(hci_data[2], hci_data[4])
     att_opcode, att_data = att.parse(l2cap_data)
 
-    if att_opcode != 18:
-        raise Exception("Not a write request!")
+    if att_opcode != 18 and att_opcode != 22:
+        raise Exception("Not a write request!")     # or prepare write request
 
     if att_data.hex()[:2] not in handles:
         raise Exception("Not an accepted handle!")
     
+    if att_opcode == 22:
+        return att_data.hex()[8:]
     return att_data.hex()[4:]
 
 records = bts.parse("btsnoop_hci.log")
