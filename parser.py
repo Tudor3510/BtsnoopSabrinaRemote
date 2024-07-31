@@ -12,7 +12,7 @@ import btsnoop.bt.smp as smp
 # In the input file, the desired record numbers should be indexed from 1, like in WireShark
 
 # Write down the accepted handles
-DESIRED_HANDLES = {"53", "36"}
+DESIRED_HANDLES = {"53", "55"}
 
 
 
