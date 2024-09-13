@@ -1,4 +1,5 @@
 import os
+import json
 import btsnoop.btsnoop.btsnoop as bts
 import btsnoop.bt.hci_uart as hci_uart
 import btsnoop.bt.hci_cmd as hci_cmd
@@ -15,6 +16,8 @@ import btsnoop.bt.smp as smp
 DESIRED_HANDLE = "53"
 INDEXING_HANDLE = "55"
 INDEXING_PREFIX = "77"
+ACCEPTED_BUTTONS = ["volume", "power", "input"]
+ARRAY_INFORMATION_FOR_BUTTON = "volume"
 
 
 def read_le_att_value(records, desired_record_no, handles, indexing_handle, indexing_prefix):
@@ -40,18 +43,74 @@ def read_le_att_value(records, desired_record_no, handles, indexing_handle, inde
         return False, att_data.hex()[8:]
     return False, att_data.hex()[4:]
 
+
+
+
+
 records = bts.parse("btsnoop_hci.log")
 
 input = open("recordsNoIn.txt", "r")
-output = open("packetsOutput.txt", "w")
+output_json_file_name = input.readline().strip()
+button = input.readline().strip()
 
+if button not in ACCEPTED_BUTTONS:
+    raise Exception("Not an accepted button name!")
+
+
+json_data = {}
+try:
+    output = open(output_json_file_name, "r")
+    json_data = json.load(output)
+    output.close()
+except FileNotFoundError:
+    print(f"The file '{output_json_file_name}' was not found.")
+
+
+already_reset = {}
+for k in json_data.keys():
+    already_reset[k] = False
+
+
+index = ""
 for line in input:
     desired_records_no = line.strip().split()
+    if len(desired_records_no) == 0:
+        continue
 
+    final_hex = ""
     for desired_record_no in desired_records_no:
         is_index, value_hex = read_le_att_value(records, int(desired_record_no) - 1, [DESIRED_HANDLE] + [INDEXING_HANDLE], INDEXING_HANDLE, "99")
-        output.write(value_hex)
-    output.write("\n")
+        if is_index:
+            index = value_hex
+            final_hex = "index_packet"
+            if index not in json_data:
+                json_data[index] = {}
+
+            if button == ARRAY_INFORMATION_FOR_BUTTON and ((index in already_reset and not already_reset[index]) or index not in already_reset):
+                already_reset[index] = True
+                json_data[index][button] = []
+            break
+
+        if index == "":
+            raise Exception("Not starting with a packet for indexing")
+        
+        final_hex += value_hex
+
+    if final_hex == "":
+        raise Exception("Could not get a valid hex string for the packet")
+    
+    if final_hex == "index_packet":
+        continue
+    
+    if button == ARRAY_INFORMATION_FOR_BUTTON:
+        json_data[index][button].append(final_hex)
+    else:
+        json_data[index][button] = final_hex
+
+
+output = open(output_json_file_name, "w")
+json.dump(json_data, output, indent=4)
+output.close()
 
 input.close()
 output.close()
