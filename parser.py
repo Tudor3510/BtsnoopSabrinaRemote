@@ -99,8 +99,8 @@ for line in input:
     if final_hex == "":
         raise Exception("Could not get a valid hex string for the packet")
     
-    if final_hex == "index_packet":
-        continue
+    if final_hex == "index_packet":         # the packet for indexing should not
+        continue                            # have another packet on its line
     
     if button == ARRAY_INFORMATION_FOR_BUTTON:
         json_data[index][button].append(final_hex)
