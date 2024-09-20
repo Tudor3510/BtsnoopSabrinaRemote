@@ -33,7 +33,6 @@ def read_le_att_value(records, desired_record_no, handles, indexing_handle, inde
     if att_data.hex()[:2] not in handles:
         raise Exception("Not an accepted handle!")
     
-    print (att_data.hex()[4:6])
     if att_data.hex()[:2] == indexing_handle and att_data.hex()[4:6] == indexing_prefix:
         if att_data.hex()[7] == "0":
             return True, att_data.hex()[8:]
@@ -79,7 +78,7 @@ for line in input:
 
     final_hex = ""
     for desired_record_no in desired_records_no:
-        is_index, value_hex = read_le_att_value(records, int(desired_record_no) - 1, [DESIRED_HANDLE] + [INDEXING_HANDLE], INDEXING_HANDLE, "99")
+        is_index, value_hex = read_le_att_value(records, int(desired_record_no) - 1, [DESIRED_HANDLE] + [INDEXING_HANDLE], INDEXING_HANDLE, INDEXING_PREFIX)
         if is_index:
             index = value_hex
             final_hex = "index_packet"
@@ -110,7 +109,6 @@ for line in input:
 
 output = open(output_json_file_name, "w")
 json.dump(json_data, output, indent=4)
-output.close()
 
 input.close()
 output.close()
